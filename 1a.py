@@ -1,65 +1,63 @@
 import json
 import time
-from selenium import webdriver # type: ignore
-from selenium.webdriver.chrome.options import Options # type: ignore
-from selenium.webdriver.common.by import By # pyright: ignore[reportMissingImports]
-from selenium.webdriver.support.ui import WebDriverWait # type: ignore
-from selenium.webdriver.support import expected_conditions as EC # type: ignore
-from selenium.common.exceptions import NoSuchElementException # type: ignore
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import NoSuchElementException
 
 # Configurações
 URL = "https://taskitos.cupiditys.lol/"
 HEADLESS = False  # True para rodar sem abrir janela, False para visível
 TIMEOUT = 30  # tempo máximo para espera explícita
 
-# Dados dos alunos em formato JSON
+# Dados dos alunos em formato JSON (numerados)
 STUDENTS_DATA = [
-    {"Nome": "ANA CLARA NUNES GATINI", "Login": "110443g", "Senha": "Aluno@2910"},
-    {"Nome": "ALYSSOM COSTA BARBOSA", "Login": "110574b", "Senha": "Aluno@1706"},
-    {"Nome": "ANA CLARA JUDITE ALVES SILVA", "Login": "111710s", "Senha": "Aluno@2506"},
-    {"Nome": "ANA KLARA OLIVEIRA", "Login": "112669o", "Senha": "Aluno@3004"},
-    {"Nome": "ANNA JULLYA COSTA DE SÁ", "Login": "110017s", "Senha": "Aluno@0807"},
-    {"Nome": "BARBARA MILLER RAMOS", "Login": "112188r", "Senha": "Aluno@0802"},
-    {"Nome": "BRYAN ALVES", "Login": "110184a", "Senha": "Aluno@0607"},
-    {"Nome": "DANIELA NOBERTO DE LIMA", "Login": "111608l", "Senha": "Aluno@2209"},
-    {"Nome": "DENILSON MARINI FEDOSSI", "Login": "110761f", "Senha": "Aluno@1911"},
-    {"Nome": "DOUGLAS WALLYSON VINICIUS MENEZES MASSOLA", "Login": "109684m", "Senha": "Aluno@2402"},
-    {"Nome": "ENZO RODRIGO DOS SANTOS PINTO", "Login": "113368p", "Senha": "Aluno@1809"},
-    {"Nome": "FLÁVIA EDUARDA MACHADO", "Login": "112768m", "Senha": "Aluno@1512"},
-    {"Nome": "GABRIEL LIMA GONÇALVES", "Login": "111608g", "Senha": "Aluno@3007"},
-    {"Nome": "GUSTAVO TEIXEIRA AMÉNDOLA", "Login": "113368a", "Senha": "Aluno@0305"},
-    {"Nome": "HELENA DOS SANTOS COLEONI", "Login": "113367c", "Senha": "Aluno@0203"},
-    {"Nome": "HELOÃ YSABELLE DIAS", "Login": "113366d", "Senha": "Aluno@0906"},
-    {"Nome": "HOMERO DE MELLO ALVES", "Login": "111142a", "Senha": "Aluno@2303"},
-    {"Nome": "JOANA DE LUCAS PEIXE BARBOSA ALVES", "Login": "112668a", "Senha": "Aluno@0810"},
-    {"Nome": "JOÃO LUCAS SOARES CARDOSO", "Login": "113374c", "Senha": "Aluno@0605"},
-    {"Nome": "JOÃO PAULO DOS SANTOS MARTINS", "Login": "113374m", "Senha": "Aluno@2912"},
-    {"Nome": "JOÃO PEDRO BARCELLOS", "Login": "112659b", "Senha": "Aluno@0604"},
-    {"Nome": "JOÃO VITOR DOS REIS", "Login": "110898r", "Senha": "Aluno@2606"},
-    {"Nome": "JONATAS PEREIRA DOS SANTOS", "Login": "113193s", "Senha": "Aluno@1503"},
-    {"Nome": "JÚLIA CALIXTO", "Login": "113370c", "Senha": "Aluno@1512"},
-    {"Nome": "JÚLIA COMPARETTO ALVES", "Login": "109843a", "Senha": "Aluno@1007"},
-    {"Nome": "KAUÊ EDUARDO PREVIATO DE ALMEIDA", "Login": "110273a", "Senha": "Aluno@2508"},
-    {"Nome": "LUIGI GABRIEL ORLANDO CARDOSO", "Login": "111178c", "Senha": "Aluno@1806"},
-    {"Nome": "LURIANY CASTILHO GODOY", "Login": "113370g", "Senha": "Aluno@2412"},
-    {"Nome": "MANASSÉS GONÇALVES ANTONIO", "Login": "110462a", "Senha": "Aluno@1304"},
-    {"Nome": "MAYTÉ FRANCISCO DAS CHAGAS", "Login": "109649c", "Senha": "Aluno@2607"},
-    {"Nome": "MARYANE VICTÓRIA VIEIRA", "Login": "113374v", "Senha": "Aluno@0303"},
-    {"Nome": "ANA CECÍLIA SAMPIETRO DA SILVA", "Login": "109896s", "Senha": "Aluno@0208"},
-    {"Nome": "MIGUEL DE SOUZA CAMPREGHER", "Login": "113367c", "Senha": "Aluno@2903"},
-    {"Nome": "MIGUEL LEITE PEREIRA", "Login": "111628p", "Senha": "Aluno@0205"},
-    {"Nome": "NATACHA FAUSTINO DIAS MAZOCHO", "Login": "114616m", "Senha": "Aluno@2106"},
-    {"Nome": "RICARDO FERNANDES SOUSA", "Login": "110898s", "Senha": "Aluno@3108"},
-    {"Nome": "RICHARD DO CARMO SANTI", "Login": "113374s", "Senha": "Aluno@1211"},
-    {"Nome": "THALYA GABRIELA GOMES FRANCISCO", "Login": "109561f", "Senha": "Aluno@1607"},
-    {"Nome": "THAMILLY VICTÓRIA DUARTE DE AMORIM", "Login": "110867a", "Senha": "Aluno@1601"},
-    {"Nome": "VIKTOR GABRIEL EVANGELISTA VIEIRA", "Login": "111575v", "Senha": "Aluno@1107"},
-    {"Nome": "VINICIUS LUIZ OLIVEIRA DE ALMEIDA", "Login": "113367a", "Senha": "Aluno@0604"},
-    {"Nome": "VINICIUS ROBERTO RODRIGUES AMBROZIO", "Login": "112070a", "Senha": "Aluno@1505"},
-    {"Nome": "YASMIN DA SILVA ALEXANDRE", "Login": "110704a", "Senha": "Aluno@2411"},
-    {"Nome": "VITÓRIA APARECIDA DA COSTA", "Login": "113370c", "Senha": "Aluno@1908"},
-    {"Nome": "JULIANO DO CARMO MILLER", "Login": "113366m", "Senha": "Aluno@0707"},
-    {"Nome": "KAIO HENRICK NALIN RAMOS", "Login": "110635r", "Senha": "Aluno@1003"}
+    {"Número": 1, "Nome": "ANA CLARA NUNES GATINI", "Login": "1104434891sp", "Senha": "Mcc@ac29"},  
+    {"Número": 2, "Nome": "ALYSSOM COSTA BARBOSA", "Login": "1105748674sp", "Senha": "Mcc@ac17"},    
+    {"Número": 3, "Nome": "ANA CLARA JUDITE ALVES SILVA", "Login": "1117104679sp", "Senha": "Mcc@ac25"},  
+    {"Número": 4, "Nome": "ANA KLARA OLIVEIRA", "Login": "1126699998sp", "Senha": "Mcc@ak30"},      
+    {"Número": 5, "Nome": "ANNA JULLYA COSTA DE SÁ", "Login": "1100174436sp", "Senha": "Mcc@aj08"},  
+    {"Número": 6, "Nome": "BARBARA MILLER RAMOS", "Login": "1121888343sp", "Senha": "Mcc@bm08"},    
+    {"Número": 7, "Nome": "BRYAN ALVES", "Login": "1101848200sp", "Senha": "Mcc@ba06"},           
+    {"Número": 8, "Nome": "DANIELA NOBERTO DE LIMA", "Login": "1116083978sp", "Senha": "Mcc@dn22"}, 
+    {"Número": 9, "Nome": "DENILSON MARINI FEDOSSI", "Login": "1107617716sp", "Senha": "Mcc@dm19"}, 
+    {"Número": 10, "Nome": "DOUGLAS WALLYSON VINICIUS MENEZES MASSOLA", "Login": "1096843213sp", "Senha": "Mcc@dw24"},  
+    {"Número": 11, "Nome": "ENZO RODRIGO DOS SANTOS PINTO", "Login": "1133687647sp", "Senha": "Mcc@er18"},
+    {"Número": 12, "Nome": "FLÁVIA EDUARDA MACHADO", "Login": "1127687451sp", "Senha": "Mcc@fe15"},  
+    {"Número": 13, "Nome": "GABRIEL LIMA GONÇALVES", "Login": "1116081787sp", "Senha": "Mcc@gl30"},  
+    {"Número": 14, "Nome": "GUSTAVO TEIXEIRA AMÉNDOLA", "Login": "1133686862sp", "Senha": "Mcc@gt03"},  
+    {"Número": 15, "Nome": "HELENA DOS SANTOS COLEONI", "Login": "1133673314sp", "Senha": "Mcc@hs02"},  
+    {"Número": 16, "Nome": "HELOÃ YSABELLE DIAS", "Login": "1133661348sp", "Senha": "Mcc@hy09"},    
+    {"Número": 17, "Nome": "HOMERO DE MELLO ALVES", "Login": "1111423854sp", "Senha": "Mcc@hm23"},  
+    {"Número": 18, "Nome": "JOANA DE LUCAS PEIXE BARBOSA ALVES", "Login": "1126685690sp", "Senha": "Mcc@jl08"},  
+    {"Número": 19, "Nome": "JOÃO LUCAS SOARES CARDOSO", "Login": "113374929Xsp", "Senha": "Mcc@jl06"},  
+    {"Número": 20, "Nome": "JOÃO PAULO DOS SANTOS MARTINS", "Login": "1133748867sp", "Senha": "Mcc@jp29"},  
+    {"Número": 21, "Nome": "JOÃO PEDRO BARCELLOS", "Login": "1126596218sp", "Senha": "Mcc@jp06"},     # J (JOÃO) + P (PEDRO)
+    {"Número": 22, "Nome": "JOÃO VITOR DOS REIS", "Login": "1108987187sp", "Senha": "Mcc@jv26"},      # J (JOÃO) + V (VITOR)
+    {"Número": 23, "Nome": "JONATAS PEREIRA DOS SANTOS", "Login": "1131934313sp", "Senha": "Mcc@jp15"},  # J (JONATAS) + P (PEREIRA)
+    {"Número": 24, "Nome": "JÚLIA CALIXTO", "Login": "113370248Xsp", "Senha": "Mcc@jc15"},           # J (JÚLIA) + C (CALIXTO)
+    {"Número": 25, "Nome": "JÚLIA COMPARETTO ALVES", "Login": "1098432940sp", "Senha": "Mcc@jc10"},  # J (JÚLIA) + C (COMPARETTO)
+    {"Número": 26, "Nome": "KAUÉ EDUARDO PREVIATO DE ALMEIDA", "Login": "110273715Xsp", "Senha": "Mcc@ke25"},  # K (KAUÉ) + E (EDUARDO)
+    {"Número": 27, "Nome": "LUIGI GABRIEL ORLANDO CARDOSO", "Login": "1111786963sp", "Senha": "Mcc@lg18"},  # L (LUIGI) + G (GABRIEL)
+    {"Número": 28, "Nome": "LURIANY CASTILHO GODOY", "Login": "1133701139sp", "Senha": "Mcc@lc24"},  # L (LURIANY) + C (CASTILHO)
+    {"Número": 29, "Nome": "MANASSÉS GONÇALVES ANTONIO", "Login": "1104625258sp", "Senha": "Mcc@mg13"},  # M (MANASSÉS) + G (GONÇALVES)
+    {"Número": 30, "Nome": "MAYTÉ FRANCISCO DAS CHAGAS", "Login": "1096493913sp", "Senha": "Mcc@mf26"},  # M (MAYTÉ) + F (FRANCISCO)
+    {"Número": 31, "Nome": "MARYANE VICTÓRIA VIEIRA", "Login": "1133747784sp", "Senha": "Mcc@mv03"},  # M (MARYANE) + V (VICTÓRIA)
+    {"Número": 32, "Nome": "MIGUEL DE SOUZA CAMPREGHER", "Login": "1133674033sp", "Senha": "Mcc@ms29"},  # M (MIGUEL) + S (SOUZA)
+    {"Número": 33, "Nome": "MIGUEL LEITE PEREIRA", "Login": "1116285800sp", "Senha": "Mcc@ml02"},     # M (MIGUEL) + L (LEITE)
+    {"Número": 34, "Nome": "NATACHA FAUSTINO DIAS MAZOCHO", "Login": "1146165900sp", "Senha": "Mcc@nf21"},  # N (NATACHA) + F (FAUSTINO)
+    {"Número": 35, "Nome": "RICARDO FERNANDES SOUSA", "Login": "1108980429sp", "Senha": "Mcc@rf31"},  # R (RICARDO) + F (FERNANDES)
+    {"Número": 36, "Nome": "RICHARD DO CARMO SANTI", "Login": "1133748387sp", "Senha": "Mcc@rc12"},  # R (RICHARD) + C (CARMO)
+    {"Número": 37, "Nome": "THALYA GABRIELA GOMES FRANCISCO", "Login": "1095619603sp", "Senha": "Mcc@tg16"},  # T (THALYA) + G (GABRIELA)
+    {"Número": 38, "Nome": "THAMILLY VICTÓRIA DUARTE DE AMORIM", "Login": "1108679626sp", "Senha": "Mcc@tv16"},  # T (THAMILLY) + V (VICTÓRIA)
+    {"Número": 39, "Nome": "VIKTOR GABRIEL EVANGELISTA VIERA", "Login": "1115758470sp", "Senha": "Mcc@vg11"},  # V (VIKTOR) + G (GABRIEL)
+    {"Número": 40, "Nome": "VINICIUS LUIZ OLIVEIRA DE ALMEIDA", "Login": "1133673624sp", "Senha": "Mcc@vl06"},  # V (VINICIUS) + L (LUIZ)
+    {"Número": 41, "Nome": "VINICIUS ROBERTO RODRIGUES AMBROZIO", "Login": "1120706919sp", "Senha": "Mcc@vr15"},  # V (VINICIUS) + R (ROBERTO)
+    {"Número": 42, "Nome": "YASMIN DA SILVA ALEXANDRE", "Login": "1107046658sp", "Senha": "Mcc@yd24"},  # Y (YASMIN) + D (DA)
+    {"Número": 43, "Nome": "JULIANO DO CARMO MILLER", "Login": "1133663667sp", "Senha": "Mcc@jc07"},   # J (JULIANO) + C (CARMO)
+    {"Número": 44, "Nome": "KAIO HENRICK NALIN RAMOS", "Login": "1106358922sp", "Senha": "Mcc@kh10"}   # K (KAIO) + H (HENRICK)
 ]
 
 def setup_driver(headless: bool) -> webdriver.Chrome:
@@ -186,16 +184,17 @@ def process_student(driver, login: str, password: str) -> bool:
 def main():
     driver = setup_driver(HEADLESS)
 
-    total = 0
+    total = len(STUDENTS_DATA)  # Total de alunos
     success = 0
     failure = 0
 
     try:
         for student in STUDENTS_DATA:
-            total += 1
             login = student["Login"]
             password = student["Senha"]
-            print(f"\n➡️ Processando {login} ({total})...")
+            current_num = student["Número"]  # Pega o número do aluno atual
+            
+            print(f"\n➡️ Processando {login} ({current_num}/{total})...")
             result = process_student(driver, login, password)
             if result:
                 success += 1
